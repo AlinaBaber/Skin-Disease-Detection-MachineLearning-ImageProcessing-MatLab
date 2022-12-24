@@ -1,0 +1,31 @@
+function [YY,XX] = KLMN(Ap,Xint_v,Uk,Qu,Vk,Qv,C,n);
+Ap(2,:) = 0;
+for ii = 1:1:length(Ap)-1
+    Ap(ii+1,ii) = 1;
+end
+Xminbark = Ap*Xint_v';        %  FIRST  STEP
+Pk = Xint_v*Xint_v';
+Pk = Ap*Pk*Ap' + Qv;          %  SECOND STEP
+YY = 1;
+Kk = Pk*C'*inv(C*Pk*C'+Qv);   %  THIRD  STEP
+XXn = Ap*Xminbark + [Uk(1),zeros(1:(1:length(Ap))-1)]';     % UPPER EQUATIONS.
+YYn = C*XXn  + [Vk(1), zeros(1:(1:length(Ap))-1)]';         % UPPER EQUATIONS.
+Xupd = Xminbark + Kk*(YYn - C*Xminbark);                    % FOURTH STEP
+Pk = (1-Kk*C)*Pk;                                           % FIFTH STEP
+OUTX(1,1) = XXn(1,1);
+OUTY = YYn;
+for ii = 2:1:n
+Xminbark = Ap*XXn;           %  FIRST  STEP
+Pk = XXn*XXn';
+Pk = Ap*Pk*Ap' + Qv;          %  SECOND STEP
+YY = 1;
+Kk = Pk*C'*inv(C*Pk*C'+Qv);   %  THIRD  STEP
+XXn = Ap*Xminbark + [Uk(ii),zeros(1:(1:length(Ap))-1)]';     % UPPER EQUATIONS.
+YYn = C*XXn  + [Vk(ii), zeros(1:(1:length(Ap))-1)]';         % UPPER EQUATIONS.
+Xupd = Xminbark + Kk*(YYn - C*Xminbark);                     % FOURTH STEP
+Pk = (1-Kk*C)*Pk;                                            % FIFTH STEP
+OUTX(ii) = XXn(1,1);
+OUTY(ii) = YYn;
+end
+YY = OUTY;
+XX = OUTX;
